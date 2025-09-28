@@ -9,7 +9,7 @@ session_start();
 
 $step = isset($_GET["step"]) ? intval($_GET["step"]) : 1;
 
-define("REPO_URL", "https://github.com/your-org/your-project.git");
+define("REPO_URL", "https://github.com/AegisAutomation/web/src");
 define("REPO_BRANCH", "main");
 define("APP_DIR", __DIR__ . "/app");
 
