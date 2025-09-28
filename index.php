@@ -11,7 +11,9 @@ $step = isset($_GET["step"]) ? intval($_GET["step"]) : 1;
 
 function renderHeader($title = "Web Installer")
 {
-    echo "<!DOCTYPE html><html><head><title>" . htmlspecialchars($title) . "</title>";
+    echo "<!DOCTYPE html><html><head><title>" .
+        htmlspecialchars($title) .
+        "</title>";
     echo "<style>body{font-family:sans-serif;margin:40px;}input,select{padding:5px;margin:5px;} .error{color:red;}</style>";
     echo "</head><body><h1>" . htmlspecialchars($title) . "</h1>";
 }
@@ -33,11 +35,10 @@ if ($step === 1) {
         <button type="submit">Next</button>
     </form>
     <?php renderFooter();
-
 } elseif ($step === 2 && $_SERVER["REQUEST_METHOD"] === "POST") {
 
     $_SESSION["repo_url"] = trim($_POST["repo_url"]);
-    $_SESSION["branch"]   = trim($_POST["branch"]) ?: "main";
+    $_SESSION["branch"] = trim($_POST["branch"]) ?: "main";
 
     renderHeader("Step 2: Database Setup");
 
@@ -53,40 +54,55 @@ if ($step === 1) {
             $pdo = new PDO($dsn, $user, $pass, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ]);
-            $_SESSION["db"] = ["host" => $host, "name" => $name, "user" => $user, "pass" => $pass];
+            $_SESSION["db"] = [
+                "host" => $host,
+                "name" => $name,
+                "user" => $user,
+                "pass" => $pass,
+            ];
             header("Location: ?step=3");
-            exit;
+            exit();
         } catch (Exception $e) {
-            $error = "Database connection failed: " . htmlspecialchars($e->getMessage());
+            $error =
+                "Database connection failed: " .
+                htmlspecialchars($e->getMessage());
         }
     }
     ?>
     <?php if ($error): ?><p class="error"><?= $error ?></p><?php endif; ?>
     <form method="post" action="?step=2">
         <label>Database Host:<br>
-            <input type="text" name="db_host" value="<?= htmlspecialchars($_POST["db_host"] ?? "localhost") ?>" required>
+            <input type="text" name="db_host" value="<?= htmlspecialchars(
+                $_POST["db_host"] ?? "localhost"
+            ) ?>" required>
         </label><br>
         <label>Database Name:<br>
-            <input type="text" name="db_name" value="<?= htmlspecialchars($_POST["db_name"] ?? "") ?>" required>
+            <input type="text" name="db_name" value="<?= htmlspecialchars(
+                $_POST["db_name"] ?? ""
+            ) ?>" required>
         </label><br>
         <label>Database User:<br>
-            <input type="text" name="db_user" value="<?= htmlspecialchars($_POST["db_user"] ?? "") ?>" required>
+            <input type="text" name="db_user" value="<?= htmlspecialchars(
+                $_POST["db_user"] ?? ""
+            ) ?>" required>
         </label><br>
         <label>Database Password:<br>
-            <input type="password" name="db_pass" value="<?= htmlspecialchars($_POST["db_pass"] ?? "") ?>" required>
+            <input type="password" name="db_pass" value="<?= htmlspecialchars(
+                $_POST["db_pass"] ?? ""
+            ) ?>" required>
         </label><br>
         <button type="submit">Test & Continue</button>
     </form>
     <?php renderFooter();
-
 } elseif ($step === 3) {
 
     if (!isset($_SESSION["db"])) {
         header("Location: ?step=2");
-        exit;
+        exit();
     }
 
-    renderHeader("Step 3: SSH Key Setup"); ?>
+    renderHeader("Step 3: SSH Key Setup");
+    ?>
     <p>To deploy from GitHub over SSH, you need an SSH key:</p>
     <ol>
         <li>On your server, run: <code>ssh-keygen -t rsa -b 4096 -C "your_email@example.com"</code></li>
@@ -103,7 +119,6 @@ if ($step === 1) {
         <button type="submit">Next</button>
     </form>
     <?php renderFooter();
-
 } elseif ($step === 4 && $_SERVER["REQUEST_METHOD"] === "POST") {
 
     renderHeader("Final Step: Configuration Complete");
@@ -134,13 +149,14 @@ PHP;
     <p>Next steps:</p>
     <ol>
         <li>Clone the repo manually:<br>
-            <code>git clone -b <?= htmlspecialchars($_SESSION["branch"]) ?> <?= htmlspecialchars($_SESSION["repo_url"]) ?></code>
+            <code>git clone -b <?= htmlspecialchars(
+                $_SESSION["branch"]
+            ) ?> <?= htmlspecialchars($_SESSION["repo_url"]) ?></code>
         </li>
         <li>Run your database migrations/import SQL schema.</li>
         <li>Delete this <code>index.php</code> installer file for security.</li>
     </ol>
     <?php renderFooter();
-
 } else {
     header("Location: ?step=1");
     exit();
